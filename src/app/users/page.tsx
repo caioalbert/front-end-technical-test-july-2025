@@ -55,6 +55,7 @@ export default function UsersPage() {
   const { data, isLoading, isError, error } = useUsers(queryClient, mounted);
   const [open, setOpen] = React.useState(false);
   const [editUser, setEditUser] = React.useState<User | null>(null);
+  const [search, setSearch] = React.useState(""); // Estado do filtro de busca
   const {
     register,
     handleSubmit,
@@ -76,6 +77,11 @@ export default function UsersPage() {
     }
   }, [editUser, reset, open]);
   if (!mounted) return null;
+
+  // Filtra os usuários pelo nome digitado
+  const filteredUsers = (data || []).filter(user =>
+    user.name.toLowerCase().includes(search.toLowerCase())
+  );
 
   function onSubmit(values: UserForm) {
     if (editUser) {
@@ -181,11 +187,23 @@ export default function UsersPage() {
         </Dialog>
       </div>
       <div className="w-full max-w-2xl bg-black/70 rounded-xl shadow-lg p-6">
+        {/* Campo de busca */}
+        <input
+          type="text"
+          placeholder="Buscar usuário pelo nome..."
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          className="mb-6 w-full rounded-md border border-fuchsia-700 bg-black/60 px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-fuchsia-500"
+          aria-label="Buscar usuário pelo nome"
+        />
         {isLoading && <div className="text-center py-8">Carregando usuários...</div>}
         {isError && <div className="text-center py-8 text-red-400">Erro: {(error as Error).message}</div>}
         {data && (
           <div className="flex flex-col gap-6">
-            {data.map((user) => (
+            {filteredUsers.length === 0 && (
+              <div className="text-center text-gray-400 py-8">Nenhum usuário encontrado.</div>
+            )}
+            {filteredUsers.map((user) => (
               <div
                 key={user.id}
                 className="bg-black/80 border border-fuchsia-700 rounded-2xl p-5 shadow-lg hover:shadow-2xl hover:-translate-y-2 hover:border-fuchsia-400 transition-all duration-200 flex flex-col sm:flex-row sm:items-center gap-4"
