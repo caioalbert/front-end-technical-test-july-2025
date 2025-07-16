@@ -1,103 +1,110 @@
-import Image from "next/image";
+'use client';
+
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+
+type Star = { width: number; height: number; top: number; left: number };
+
+const generateStars = (count: number): Star[] =>
+  Array.from({ length: count }, () => ({
+    width: Math.random() * 2 + 1,
+    height: Math.random() * 2 + 1,
+    top: Math.random() * 100,
+    left: Math.random() * 100,
+  }));
+
+const TITLE = 'Olá, recrutador!';
+const SUBTITLE = 'Desafio técnico Vorp - Caio Alberto Ferreira';
+const TYPING_SPEED = 40;
 
 export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [stars, setStars] = useState<Star[]>([]);
+  const [mounted, setMounted] = useState(false);
+  const [typedTitle, setTypedTitle] = useState('');
+  const [typedSubtitle, setTypedSubtitle] = useState('');
+  const [showButton, setShowButton] = useState(false);
+  const router = useRouter();
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
+  useEffect(() => {
+    setMounted(true);
+    setStars(generateStars(50));
+  }, []);
+
+  // Efeito de digitação do título e subtítulo
+  useEffect(() => {
+    let i = 0;
+    setTypedTitle('');
+    setTypedSubtitle('');
+    setShowButton(false);
+    const interval = setInterval(() => {
+      i++;
+      setTypedTitle(TITLE.substring(0, i));
+      if (i === TITLE.length) {
+        clearInterval(interval);
+        setTimeout(() => {
+          let j = 0;
+          const subtitleInterval = setInterval(() => {
+            j++;
+            setTypedSubtitle(SUBTITLE.substring(0, j));
+            if (j === SUBTITLE.length) {
+              clearInterval(subtitleInterval);
+              setTimeout(() => setShowButton(true), 300);
+            }
+          }, TYPING_SPEED);
+        }, 300);
+      }
+    }, TYPING_SPEED);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div className="min-h-dvh flex flex-col items-center justify-center relative overflow-hidden px-4 bg-black">
+      {/* Gradiente roxo suave no topo */}
+      <div className="absolute top-0 left-0 w-full h-56 z-0 pointer-events-none select-none">
+        <div className="w-full h-full bg-gradient-to-b from-fuchsia-700/60 via-purple-900/40 to-transparent" />
+      </div>
+
+      {/* Estrelas só no client */}
+      {mounted && (
+        <div className="absolute inset-0 z-0 pointer-events-none select-none">
+          {stars.map((star, i) => (
+            <div
+              key={i}
+              className="absolute rounded-full bg-white opacity-20"
+              style={{
+                width: `${star.width}px`,
+                height: `${star.height}px`,
+                top: `${star.top}%`,
+                left: `${star.left}%`,
+              }}
             />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+          ))}
         </div>
+      )}
+
+      {/* Conteúdo central */}
+      <main className="flex flex-col items-center justify-center z-10 min-h-dvh w-full max-w-5xl mx-auto px-4">
+        <h1 className="text-4xl sm:text-6xl font-extrabold text-center text-fuchsia-300 mb-6 drop-shadow-lg max-w-3xl min-h-[3.5rem] sm:min-h-[5rem]">
+          {typedTitle}
+          <span className="animate-pulse text-white">
+            {typedTitle.length < TITLE.length ? '|' : ''}
+          </span>
+        </h1>
+        <p className="text-lg sm:text-2xl text-center text-gray-300 max-w-2xl mb-10 min-h-[2.5rem]">
+          {typedSubtitle}
+          <span className="animate-pulse text-white">
+            {typedTitle.length === TITLE.length && typedSubtitle.length < SUBTITLE.length ? '|' : ''}
+          </span>
+        </p>
+        <button
+          onClick={() => router.push('/users')}
+          className={`px-8 py-4 rounded-full bg-gradient-to-r from-fuchsia-600 via-purple-500 to-indigo-500 text-lg font-semibold text-white shadow-lg transition-all focus:outline-none focus:ring-2 focus:ring-fuchsia-400 cursor-pointer ${
+            showButton ? 'opacity-100' : 'opacity-0 pointer-events-none'
+          }`}
+        >
+          Tela inicial
+        </button>
       </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
     </div>
   );
 }
