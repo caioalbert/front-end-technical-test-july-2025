@@ -97,8 +97,8 @@ export default function Home() {
           </span>
         </p>
         <button
-          onClick={() => router.push('/teste')}
-          className={`px-8 py-4 rounded-full bg-gradient-to-r from-fuchsia-600 via-purple-500 to-indigo-500 text-lg font-semibold text-white shadow-lg transition-all focus:outline-none focus:ring-2 focus:ring-fuchsia-400 ${
+          onClick={() => router.push('/users')}
+          className={`px-8 py-4 rounded-full bg-gradient-to-r from-fuchsia-600 via-purple-500 to-indigo-500 text-lg font-semibold text-white shadow-lg transition-all focus:outline-none focus:ring-2 focus:ring-fuchsia-400 cursor-pointer ${
             showButton ? 'opacity-100' : 'opacity-0 pointer-events-none'
           }`}
         >
